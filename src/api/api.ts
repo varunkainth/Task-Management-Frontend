@@ -5,7 +5,7 @@ const getToken = () => {
 };
 
 const api = axios.create({
-  baseURL: "https://task-management-vlac.onrender.com/",
+  baseURL: "https://task-management-vlac.onrender.com",
 });
 
 api.interceptors.request.use(

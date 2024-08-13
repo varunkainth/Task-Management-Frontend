@@ -1,29 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
+import { FaGithub, FaEye, FaEyeSlash } from "react-icons/fa";
 import { validateUser } from "@/utils/validation";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleAuthProvider } from "@/firebaseConfig";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import useAuth from "@/hooks/useAuth";
 
 const Login = () => {
-  const [emailOrUserId, setEmailOrUserId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errors, setErrors] = useState<{
-    emailOrUserId?: string;
+    email?: string;
     password?: string;
   }>({});
+  
+  const navigate = useNavigate();
+  const { isRegistered, isLoading, error } = useSelector(
+    (state: any) => state.user
+  );
+
+  const {emailverify} = useAuth();
+
+  useEffect(() => {
+    if (email) {
+      emailverify(email);
+    }
+  }, [email]);
 
   const handleLogin = () => {
     const { error } = validateUser({
-      email: emailOrUserId.includes("@") ? emailOrUserId : "",
-      userId: !emailOrUserId.includes("@") ? emailOrUserId : "",
+      email,
+      userId: ""
     });
 
     if (error) {
@@ -36,18 +51,17 @@ const Login = () => {
       setErrors(validationErrors);
     } else {
       setErrors({});
-      // Proceed with login logic
+      
     }
   };
 
   const handleGoogleSignIn = async () => {
-    // Handle Google Sign-In
     const result = await signInWithPopup(auth, googleAuthProvider);
     console.log(result);
   };
 
   const handleGitHubSignIn = () => {
-    // Handle GitHub Sign-In
+   
   };
 
   return (
@@ -58,53 +72,66 @@ const Login = () => {
         </h2>
         <div className="flex flex-col gap-4">
           <div>
-            <Label className="text-white">Email or ID</Label>
+            <Label className="text-white">Email</Label>
             <Input
               type="text"
-              id="emailOrUserId"
-              placeholder="Email or User ID"
-              value={emailOrUserId}
-              onChange={(e) => setEmailOrUserId(e.target.value)}
+              id="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="mt-2"
             />
-            {errors.emailOrUserId && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.emailOrUserId}
-              </p>
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
-          <div className="relative">
-            <Label className="text-white">Password</Label>
-            <Input
-              type={passwordVisible ? "text" : "password"}
-              id="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-2 pr-10"
-            />
-            <button
+          {isLoading && (
+            <p className="text-blue-500 text-sm mt-1">Checking registration...</p>
+          )}
+          {isRegistered && (
+            <div className="relative">
+              <Label className="text-white">Password</Label>
+              <Input
+                type={passwordVisible ? "text" : "password"}
+                id="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-2 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setPasswordVisible(!passwordVisible)}
+                className="absolute right-3 top-12 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 focus:outline-none"
+              >
+                {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+              </button>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
+            </div>
+          )}
+          {error && (
+            <p className="text-red-500 text-sm mt-1">{error}</p>
+          )}
+          {!isLoading && !isRegistered && (
+            <Button
               type="button"
-              onClick={() => setPasswordVisible(!passwordVisible)}
-              className="absolute right-3 top-12 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 focus:outline-none"
+              className="w-full mt-4"
+              onClick={() => navigate(`/register?email=${email}`)}
             >
-              {passwordVisible ? <FaEyeSlash /> : <FaEye />}
-            </button>
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-          </div>
-          <div className="flex justify-between text-sm mt-2">
-            <a href="#" className="text-blue-400 hover:underline">
-              Forgot Password?
-            </a>
-            <a href="#" className="text-blue-400 hover:underline">
-              Forgot Username?
-            </a>
-          </div>
-          <Button type="button" className="w-full mt-4" onClick={handleLogin}>
-            Login
-          </Button>
+              Register
+            </Button>
+          )}
+          {isRegistered && (
+            <Button
+              type="button"
+              className="w-full mt-4"
+              onClick={handleLogin}
+            >
+              Login
+            </Button>
+          )}
           <div className="flex flex-col gap-2 mt-4">
             <Button
               variant="outline"

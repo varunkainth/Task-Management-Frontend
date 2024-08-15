@@ -6,7 +6,7 @@ interface UserProfile {
   name: string;
   email: string;
   phoneNumber: string;
-  profilePicture: string;
+  profilePic: string;
 }
 
 const HomePage: React.FC = () => {
@@ -32,7 +32,7 @@ const HomePage: React.FC = () => {
         </CardHeader>
         <CardContent className="flex flex-col items-center">
           <Avatar className="w-24 h-24 mb-4">
-            <AvatarImage src={userProfile.profilePicture} alt={userProfile.name} />
+            <AvatarImage src={userProfile.profilePic} alt={userProfile.name} />
             <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="space-y-2 text-center">

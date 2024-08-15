@@ -1,4 +1,3 @@
-
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store";
 import {
@@ -24,7 +23,11 @@ const useAuth = () => {
   const signupWithGoogle = (idToken: string) => dispatch(googleSignup(idToken));
   const signupWithGithub = (idToken: string) => dispatch(githubSignup(idToken));
   const clearAuthError = () => dispatch(clearError());
-  const emailverify = (email:string)=>dispatch(emailVerify(email));
+
+  const verifyEmail = async (email: string) => {
+    await dispatch(emailVerify(email));
+    return auth.success;
+  };
 
   return {
     user: auth.user,
@@ -32,13 +35,14 @@ const useAuth = () => {
     isAuthenticated: auth.isAuthenticated,
     loading: auth.loading,
     error: auth.error,
+    success: auth.success,
     loginUser,
     registerUser,
     logoutUser,
     signupWithGoogle,
     signupWithGithub,
     clearAuthError,
-    emailverify
+    verifyEmail,
   };
 };
 

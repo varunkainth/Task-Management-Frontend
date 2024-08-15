@@ -13,6 +13,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
+  success?:boolean
 }
 
 export interface LoginCredentials {
@@ -26,9 +27,10 @@ export interface RegisterCredentials {
   password: string;
   phoneNumber: string;
   gender: string;
-  dob: string;
+  dob: Date | null;
 }
 export interface AuthResponse{
+    success: boolean | undefined;
     token: string;
     user:User;
     message:string

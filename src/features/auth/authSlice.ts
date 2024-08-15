@@ -32,6 +32,7 @@ export const emailVerify = createAsyncThunk<AuthResponse,string>(
   "auth/emailverify",
   async (email, { rejectWithValue }) => {
     try {
+      // console.log("/",API_ENDPOINTS.VERIFY_EMAIL)
       const response = await api.post(API_ENDPOINTS.VERIFY_EMAIL, { email });
       return response.data;
     } catch (err: any) {
@@ -88,7 +89,7 @@ export const googleSignup = createAsyncThunk<AuthResponse, string>(
   async (idToken, { rejectWithValue }) => {
     try {
       const response = await api.post<AuthResponse>(API_ENDPOINTS.GOOGLE_SIGN, {
-        idToken,
+        id:idToken,
       });
       return response.data;
     } catch (error: any) {
@@ -117,6 +118,7 @@ const initialState: AuthState = {
   error: null,
   loading: false,
   isAuthenticated: !!getLocalStorage<string>("token"),
+  success:false
 };
 
 // Slice for authentication
@@ -220,11 +222,13 @@ const authSlice = createSlice({
       .addCase(emailVerify.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
+        state.success = action.payload.success; 
         setLocalStorage("user", action.payload.user);
       })
       .addCase(emailVerify.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+
       })
       .addDefaultCase((state) => {
         state.loading = false;

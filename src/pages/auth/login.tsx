@@ -8,38 +8,55 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaEye, FaEyeSlash } from "react-icons/fa";
 import { validateUser } from "@/utils/validation";
 import { signInWithPopup } from "firebase/auth";
-import { auth, googleAuthProvider } from "@/firebaseConfig";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { auth, googleAuthProvider, githubAuthProvider } from "@/firebaseConfig";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [errors, setErrors] = useState<{
-    email?: string;
-    password?: string;
-  }>({});
-  
-  const navigate = useNavigate();
-  const { isRegistered, isLoading, error } = useSelector(
-    (state: any) => state.user
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
   );
+  const [debouncedEmail, setDebouncedEmail] = useState<string>("");
 
-  const {emailverify} = useAuth();
+  const navigate = useNavigate();
+  const {
+    loginUser,
+    signupWithGoogle,
+    signupWithGithub,
+    verifyEmail,
+    loading,
+    success,
+    user,
+  } = useAuth();
 
+  // Debounce email input
   useEffect(() => {
-    if (email) {
-      emailverify(email);
-    }
+    const handler = setTimeout(() => {
+      setDebouncedEmail(email);
+    }, 2000);
+
+    return () => {
+      clearTimeout(handler);
+    };
   }, [email]);
 
+  useEffect(() => {
+    const handleEmailVerification = async () => {
+      if (debouncedEmail) {
+        const isVerified = await verifyEmail(debouncedEmail);
+        if (!isVerified) {
+          navigate(`/register?email=${debouncedEmail}`);
+        }
+      }
+    };
+    handleEmailVerification();
+  }, [debouncedEmail, verifyEmail, navigate]);
+
   const handleLogin = () => {
-    const { error } = validateUser({
-      email,
-      userId: ""
-    });
+    const { error } = validateUser({ email });
 
     if (error) {
       const validationErrors = error.details.reduce((acc: any, err: any) => {
@@ -51,17 +68,28 @@ const Login = () => {
       setErrors(validationErrors);
     } else {
       setErrors({});
-      
+      loginUser({ email, password });
     }
   };
 
   const handleGoogleSignIn = async () => {
-    const result = await signInWithPopup(auth, googleAuthProvider);
-    console.log(result);
+    try {
+      const result = await signInWithPopup(auth, googleAuthProvider);
+      const idToken = await result.user.getIdToken();
+      signupWithGoogle(idToken);
+    } catch (err) {
+      console.error("Google Sign-In Error: ", err);
+    }
   };
 
-  const handleGitHubSignIn = () => {
-   
+  const handleGitHubSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, githubAuthProvider);
+      const idToken = await result.user.getIdToken();
+      signupWithGithub(idToken);
+    } catch (err) {
+      console.error("GitHub Sign-In Error: ", err);
+    }
   };
 
   return (
@@ -85,10 +113,12 @@ const Login = () => {
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
-          {isLoading && (
-            <p className="text-blue-500 text-sm mt-1">Checking registration...</p>
+          {loading && (
+            <p className="text-blue-500 text-sm mt-1">
+              Checking registration...
+            </p>
           )}
-          {isRegistered && (
+          {user && success && (
             <div className="relative">
               <Label className="text-white">Password</Label>
               <Input
@@ -111,10 +141,7 @@ const Login = () => {
               )}
             </div>
           )}
-          {error && (
-            <p className="text-red-500 text-sm mt-1">{error}</p>
-          )}
-          {!isLoading && !isRegistered && (
+          {!loading && !user && (
             <Button
               type="button"
               className="w-full mt-4"
@@ -123,12 +150,8 @@ const Login = () => {
               Register
             </Button>
           )}
-          {isRegistered && (
-            <Button
-              type="button"
-              className="w-full mt-4"
-              onClick={handleLogin}
-            >
+          {user && success && (
+            <Button type="button" className="w-full mt-4" onClick={handleLogin}>
               Login
             </Button>
           )}
@@ -152,9 +175,9 @@ const Login = () => {
           </div>
           <div className="text-center mt-4 text-white">
             <span>Don't have an account?</span>
-            <a href="#" className="text-blue-400 hover:underline ml-1">
+            <Link to="/register" className="text-blue-400 hover:underline ml-1">
               Register
-            </a>
+            </Link>
           </div>
         </div>
       </div>

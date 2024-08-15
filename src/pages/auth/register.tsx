@@ -64,7 +64,6 @@ const Register: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => {
       const newData = { ...prev, [name]: value };
-      console.log("Updated Form Data:", newData);
       return newData;
     });
   };

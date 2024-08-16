@@ -238,5 +238,6 @@ const authSlice = createSlice({
 });
 
 // Export actions and reducer
+export const selectIsAuthenticated = (state: { auth: { token: any; }; }) => !!state.auth.token;
 export const { clearError } = authSlice.actions;
 export default authSlice.reducer;

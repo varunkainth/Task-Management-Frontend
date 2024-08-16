@@ -1,26 +1,23 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store'; 
+import { selectIsAuthenticated } from './AuthSlice'; // Adjust the path as necessary
 
-interface AuthRouteProps {
+interface ProtectedRouteProps {
   element: React.ReactElement;
-  redirectPath?: string;
 }
 
-const AuthRoute: React.FC<AuthRouteProps> = ({ element, redirectPath = '/' }) => {
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const location = useLocation();
 
-  if (isAuthenticated) {
-    return React.createElement(Navigate, {
-      to: redirectPath,
-      state: { from: location },
-      replace: true
-    });
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return element;
+  // Render the protected component
+  return <>{element}</>;
 };
 
-export default AuthRoute;
+export default ProtectedRoute;

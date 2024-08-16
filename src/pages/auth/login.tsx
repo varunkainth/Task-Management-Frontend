@@ -1,75 +1,48 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaEye, FaEyeSlash } from "react-icons/fa";
-import { validateUser } from "@/utils/validation";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleAuthProvider, githubAuthProvider } from "@/firebaseConfig";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
-  );
-  const [debouncedEmail, setDebouncedEmail] = useState<string>("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
 
-  const navigate = useNavigate();
-  const {
-    loginUser,
-    signupWithGoogle,
-    signupWithGithub,
-    verifyEmail,
-    loading,
-    success,
-    user,
-  } = useAuth();
+  const { loginUser, signupWithGoogle, signupWithGithub, verifyEmail } = useAuth();
 
-  // Debounce email input
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedEmail(email);
-    }, 2000);
+  const handleEmailVerification = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrors({ email: "Invalid email format" });
+      return;
+    }
+    setErrors({});
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [email]);
-
-  useEffect(() => {
-    const handleEmailVerification = async () => {
-      if (debouncedEmail) {
-        const isVerified = await verifyEmail(debouncedEmail);
-        if (!isVerified) {
-          navigate(`/register?email=${debouncedEmail}`);
-        }
-      }
-    };
-    handleEmailVerification();
-  }, [debouncedEmail, verifyEmail, navigate]);
+    try {
+      const user = await verifyEmail(email);
+      console.log(user,"user")
+      setIsVerified(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleLogin = () => {
-    const { error } = validateUser({ email });
-
-    if (error) {
-      const validationErrors = error.details.reduce((acc: any, err: any) => {
-        const field = err.path[0];
-        acc[field] = err.message;
-        return acc;
-      }, {});
-
-      setErrors(validationErrors);
-    } else {
-      setErrors({});
-      loginUser({ email, password });
+    if (!password) {
+      setErrors({ password: "Password is required" });
+      return;
     }
+    setErrors({});
+    loginUser({ email, password });
   };
 
   const handleGoogleSignIn = async () => {
@@ -113,13 +86,19 @@ const Login = () => {
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
-          {loading && (
-            <p className="text-blue-500 text-sm mt-1">
-              Checking registration...
-            </p>
+
+          {isVerified === null && (
+            <Button
+              type="button"
+              className="w-full mt-4 transition-transform transform hover:scale-105"
+              onClick={handleEmailVerification}
+            >
+              Continue
+            </Button>
           )}
-          {user && success && (
-            <div className="relative">
+
+          {isVerified && (
+            <div className="relative animate-fadeIn">
               <Label className="text-white">Password</Label>
               <Input
                 type={passwordVisible ? "text" : "password"}
@@ -139,22 +118,16 @@ const Login = () => {
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
               )}
+              <Button
+                type="button"
+                className="w-full mt-4 transition-transform transform hover:scale-105"
+                onClick={handleLogin}
+              >
+                Login
+              </Button>
             </div>
           )}
-          {!loading && !user && (
-            <Button
-              type="button"
-              className="w-full mt-4"
-              onClick={() => navigate(`/register?email=${email}`)}
-            >
-              Register
-            </Button>
-          )}
-          {user && success && (
-            <Button type="button" className="w-full mt-4" onClick={handleLogin}>
-              Login
-            </Button>
-          )}
+
           <div className="flex flex-col gap-2 mt-4">
             <Button
               variant="outline"
@@ -173,6 +146,7 @@ const Login = () => {
               Sign in with GitHub
             </Button>
           </div>
+
           <div className="text-center mt-4 text-white">
             <span>Don't have an account?</span>
             <Link to="/register" className="text-blue-400 hover:underline ml-1">

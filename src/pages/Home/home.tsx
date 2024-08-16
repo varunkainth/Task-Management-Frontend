@@ -33,7 +33,7 @@ const HomePage: React.FC = () => {
         <CardContent className="flex flex-col items-center">
           <Avatar className="w-24 h-24 mb-4">
             <AvatarImage src={userProfile.profilePic} alt={userProfile.name} />
-            <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{userProfile.name}</AvatarFallback>
           </Avatar>
           <div className="space-y-2 text-center">
             <p><span className="font-semibold">Name:</span> {userProfile.name}</p>

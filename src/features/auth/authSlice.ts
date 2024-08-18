@@ -223,7 +223,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.success = action.payload.success; 
-        setLocalStorage("user", action.payload.user);
+        setLocalStorage("success", action.payload);
       })
       .addCase(emailVerify.rejected, (state, action) => {
         state.loading = false;

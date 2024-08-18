@@ -1,39 +1,39 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import useAuth from '@/hooks/useAuth'; // Adjust this path as needed
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import useAuth from "@/hooks/useAuth"; // Adjust this path as needed
 
 interface AuthRouteProps {
   element: React.ReactElement;
-  redirectPath: string;
+  redirectPath?: string;
 }
 
-const AuthRoute: React.FC<AuthRouteProps> = ({ 
-  element, 
-  redirectPath 
-}) => {
+const AuthRoute: React.FC<AuthRouteProps> = ({ element, redirectPath }) => {
   const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
-  console.log('AuthRoute - path:', location.pathname);
-  console.log('AuthRoute - isAuthenticated:', isAuthenticated);
-  console.log('AuthRoute - loading:', loading);
 
   if (loading) {
-   
-    return <div>Loading...</div>;
+    return <div>Loading...</div>; // Show a loading state while checking authentication
   }
 
-  if (!isAuthenticated && redirectPath !== '/login') {
-    console.log('Redirecting to login');
+  if (
+    !isAuthenticated &&
+    location.pathname !== "/login" &&
+    location.pathname !== "/register"
+  ) {
+    console.log("User not authenticated, redirecting to login");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (isAuthenticated && (redirectPath === '/login' || redirectPath === '/register')) {
-    console.log('Redirecting to home');
-    return <Navigate to="/" replace />;
+  if (
+    isAuthenticated &&
+    (location.pathname === "/login" || location.pathname === "/register")
+  ) {
+    console.log("User is authenticated, redirecting to home");
+    return <Navigate to="/home" replace />;
   }
 
-  // Render the provided element
-  console.log('Rendering element');
+  // If no redirection is needed, render the provided element
   return element;
 };
 

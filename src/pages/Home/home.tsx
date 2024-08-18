@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -13,15 +13,21 @@ const HomePage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    const userFromStorage = localStorage.getItem('user');
+    const userFromStorage = localStorage.getItem("user");
     if (userFromStorage) {
       setUserProfile(JSON.parse(userFromStorage));
     }
   }, []);
+  console.log("User Profile", userProfile);
 
   if (!userProfile) {
-    return <div className="flex items-center justify-center h-screen">Loading user profile...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading user profile...
+      </div>
+    );
   }
+  
 
   return (
     <div className="container mx-auto p-4">
@@ -36,9 +42,16 @@ const HomePage: React.FC = () => {
             <AvatarFallback>{userProfile.name}</AvatarFallback>
           </Avatar>
           <div className="space-y-2 text-center">
-            <p><span className="font-semibold">Name:</span> {userProfile.name}</p>
-            <p><span className="font-semibold">Email:</span> {userProfile.email}</p>
-            <p><span className="font-semibold">Phone Number:</span> {userProfile.phoneNumber}</p>
+            <p>
+              <span className="font-semibold">Name:</span> {userProfile.name}
+            </p>
+            <p>
+              <span className="font-semibold">Email:</span> {userProfile.email}
+            </p>
+            <p>
+              <span className="font-semibold">Phone Number:</span>{" "}
+              {userProfile.phoneNumber}
+            </p>
           </div>
         </CardContent>
       </Card>

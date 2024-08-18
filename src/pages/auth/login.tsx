@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -14,28 +14,39 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
+  const [isVerified, setIsVerified] = useState<boolean | null>(false);
 
-  const { loginUser, signupWithGoogle, signupWithGithub, verifyEmail } = useAuth();
+  const { loginUser, signupWithGoogle, signupWithGithub, verifyEmail } =
+    useAuth();
 
-  const handleEmailVerification = async () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setErrors({ email: "Invalid email format" });
-      return;
-    }
-    setErrors({});
+    useEffect(() => {
+      console.log("isVerified state updated:", isVerified);
+    }, [isVerified]);
 
-    try {
-      const user = await verifyEmail(email);
-      console.log(user,"user")
-      setIsVerified(true);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
+    const handleEmailVerification = async () => {
+      console.log("Email verification initiated");
+    
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setErrors({ email: "Invalid email format" });
+        console.log("Invalid email format");
+        return;
+      }
+      setErrors({});
+    
+      try {
+        await verifyEmail(email);
+        console.log("Email verification successful");
+        setIsVerified(true);
+      } catch (error) {
+        console.error("Verification error:", error);
+      }
+    };
+    
+    console.log("Current isVerified state:", isVerified);
   const handleLogin = () => {
     if (!password) {
       setErrors({ password: "Password is required" });
@@ -87,7 +98,7 @@ const Login = () => {
             )}
           </div>
 
-          {isVerified === null && (
+          {isVerified === false && (
             <Button
               type="button"
               className="w-full mt-4 transition-transform transform hover:scale-105"

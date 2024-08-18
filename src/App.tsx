@@ -9,9 +9,14 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AuthRoute element={<HomePage />} redirectPath="/login" />} />
-        <Route path="/login" element={<AuthRoute element={<Login />} redirectPath="/" />} />
-        <Route path="/register" element={<AuthRoute element={<Register />} redirectPath="/" />} />
+        {/* Protected route for the home page - only accessible to authenticated users */}
+        <Route path="/home" element={<AuthRoute element={<HomePage />} redirectPath="/login" />} />
+
+        {/* Public route for login - only accessible to unauthenticated users */}
+        <Route path="/login" element={<AuthRoute element={<Login />} redirectPath="/home" />} />
+
+        {/* Public route for registration - only accessible to unauthenticated users */}
+        <Route path="/register" element={<AuthRoute element={<Register />} redirectPath="/home" />} />
       </Routes>
     </BrowserRouter>
   );

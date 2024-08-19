@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import useAuth from "@/hooks/useAuth";
 
 interface UserProfile {
   name: string;
@@ -11,6 +13,7 @@ interface UserProfile {
 
 const HomePage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const { logoutUser } = useAuth();
 
   useEffect(() => {
     const userFromStorage = localStorage.getItem("user");
@@ -26,7 +29,6 @@ const HomePage: React.FC = () => {
       </div>
     );
   }
-  
 
   return (
     <div className="container mx-auto p-4">
@@ -53,6 +55,13 @@ const HomePage: React.FC = () => {
             </p>
           </div>
         </CardContent>
+        <Button
+          variant="default"
+          className="w-full"
+          onClick={() => logoutUser()}
+        >
+          Logout
+        </Button>
       </Card>
     </div>
   );

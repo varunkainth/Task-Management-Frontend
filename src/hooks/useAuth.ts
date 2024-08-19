@@ -17,7 +17,7 @@ import {
 } from "@/features/auth/authSlice";
 import { LoginCredentials, RegisterCredentials, UserData } from "@/types/auth";
 
- const useAuth = () => {
+const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
   const auth = useSelector((state: RootState) => state.auth);
 
@@ -49,7 +49,10 @@ import { LoginCredentials, RegisterCredentials, UserData } from "@/types/auth";
   );
 
   const createResetToken = useCallback(
-    (email: string) => dispatch(CreatepasswordresetToken(email)),
+    (email: string) => {
+      console.log(email);
+      dispatch(CreatepasswordresetToken(email));
+    },
     [dispatch]
   );
 
@@ -100,4 +103,4 @@ import { LoginCredentials, RegisterCredentials, UserData } from "@/types/auth";
   };
 };
 
-export default useAuth
+export default useAuth;

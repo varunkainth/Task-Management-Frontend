@@ -1,8 +1,16 @@
 import axios from "axios";
 
-const getToken = () => {
-  return localStorage.getItem("token");
+const getToken = (): string | null => {
+  const token = localStorage.getItem("token");
+  
+  if (token) {
+    const cleanedToken = token.replace(/"/g, '').trim();
+    return cleanedToken;
+  }
+  
+  return null;
 };
+
 
 const api = axios.create({
   // baseURL: "https://task-management-vlac.onrender.com",

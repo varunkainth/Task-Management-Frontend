@@ -119,7 +119,7 @@ export const CreatepasswordresetToken = createAsyncThunk<AuthResponse, string>(
     try {
       const response = await api.post<AuthResponse>(
         API_ENDPOINTS.CREATE_PASSWORD_TOKEN,
-        email
+        {email}
       );
       return response.data;
     } catch (err: any) {

@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '@/store';
+import { useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/store";
 import {
   login,
   register,
@@ -14,10 +14,10 @@ import {
   VerifyPasswordToken,
   RefreshToken,
   RevokeRefreshToken,
-} from '@/features/auth/authSlice';
-import { LoginCredentials, RegisterCredentials, UserData } from '@/types/auth';
+} from "@/features/auth/authSlice";
+import { LoginCredentials, RegisterCredentials, UserData } from "@/types/auth";
 
-export const useAuth = () => {
+ const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
   const auth = useSelector((state: RootState) => state.auth);
 
@@ -99,3 +99,5 @@ export const useAuth = () => {
     clearAuthError,
   };
 };
+
+export default useAuth

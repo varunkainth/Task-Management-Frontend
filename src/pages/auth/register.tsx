@@ -8,13 +8,13 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleAuthProvider, githubAuthProvider } from "@/firebaseConfig";
-import useAuth from "@/hooks/useAuth";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { RegisterCredentials } from "@/types/auth";
 import { validateUser } from "@/utils/validation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import useAuth  from "@/hooks/useAuth";
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState<RegisterCredentials>({

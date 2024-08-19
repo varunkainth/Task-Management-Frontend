@@ -28,8 +28,8 @@ const getLocalStorage = <T>(key: string): T | null => {
   }
 };
 
-export const emailVerify = createAsyncThunk<AuthResponse,string>(
-  "auth/emailverify",
+export const emailVerify = createAsyncThunk<AuthResponse, string>(
+  "auth/verify/email",
   async (email, { rejectWithValue }) => {
     try {
       // console.log("/",API_ENDPOINTS.VERIFY_EMAIL)
@@ -89,7 +89,7 @@ export const googleSignup = createAsyncThunk<AuthResponse, string>(
   async (idToken, { rejectWithValue }) => {
     try {
       const response = await api.post<AuthResponse>(API_ENDPOINTS.GOOGLE_SIGN, {
-        id:idToken,
+        id: idToken,
       });
       return response.data;
     } catch (error: any) {
@@ -112,13 +112,106 @@ export const githubSignup = createAsyncThunk<AuthResponse, string>(
   }
 );
 
+export const CreatepasswordresetToken = createAsyncThunk<AuthResponse, string>(
+  "auth/create/passwordtoken",
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await api.post<AuthResponse>(
+        API_ENDPOINTS.CREATE_PASSWORD_TOKEN,
+        {
+          email,
+        }
+      );
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data || "Failed to create password reset token"
+      );
+    }
+  }
+);
+
+export const VerifyPasswordToken = createAsyncThunk<AuthResponse, string>(
+  "auth/verify/PasswordToken",
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await api.post<AuthResponse>(
+        API_ENDPOINTS.VERIFY_PASSWORD_TOKEN,
+        {
+          token,
+        }
+      );
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data || "Failed to verify password reset token"
+      );
+    }
+  }
+);
+
+export const UsePasswordToken = createAsyncThunk<AuthResponse>(
+  "auth/passwordToken",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await api.post<AuthResponse>(
+        API_ENDPOINTS.PASSWORD_RESET_TOKEN,
+        {
+          userData,
+        }
+      );
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data || "Failed to use password reset token"
+      );
+    }
+  }
+);
+
+export const RefreshToken = createAsyncThunk<AuthResponse>(
+  "auth/refreshToken",
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await api.post<AuthResponse>(
+        API_ENDPOINTS.REFRESH_TOKEN,
+        {
+          token,
+        }
+      );
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data || "Failed to refresh token");
+    }
+  }
+);
+
+export const RevokeRefreshToken = createAsyncThunk<AuthResponse>(
+  "auth/RevokeRefreshToken",
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await api.post<AuthResponse>(
+        API_ENDPOINTS.REFRESH_TOKEN_REVOKE,
+        {
+          token,
+        }
+      );
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data || "Failed to revoke refresh token"
+      );
+    }
+  }
+);
+
 const initialState: AuthState = {
   user: getLocalStorage<User>("user"),
   token: getLocalStorage<string>("token"),
   error: null,
   loading: false,
   isAuthenticated: !!getLocalStorage<string>("token"),
-  success:false
+  success: false,
 };
 
 // Slice for authentication
@@ -222,14 +315,108 @@ const authSlice = createSlice({
       .addCase(emailVerify.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-        state.success = action.payload.success; 
+        state.success = action.payload.success;
         setLocalStorage("success", action.payload);
       })
       .addCase(emailVerify.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-
       })
+      .addCase(CreatepasswordresetToken.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(CreatepasswordresetToken.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+      })
+      .addCase(
+        CreatepasswordresetToken.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+          state.success = false;
+        }
+      )
+
+      .addCase(VerifyPasswordToken.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(VerifyPasswordToken.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+      })
+      .addCase(
+        VerifyPasswordToken.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+          state.success = false;
+        }
+      )
+
+      .addCase(UsePasswordToken.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        UsePasswordToken.fulfilled,
+        (state, action: PayloadAction<AuthResponse>) => {
+          state.loading = false;
+          state.success = true;
+          // Optionally, you can handle the response data here, e.g., update user or token
+          state.user = action.payload.user;
+          state.token = action.payload.token;
+          state.isAuthenticated = true;
+        }
+      )
+      .addCase(
+        UsePasswordToken.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+          state.success = false;
+        }
+      )
+
+      .addCase(RefreshToken.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        RefreshToken.fulfilled,
+        (state, action: PayloadAction<AuthResponse>) => {
+          state.loading = false;
+          state.success = true;
+          state.token = action.payload.token;
+        }
+      )
+      .addCase(RefreshToken.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.success = false;
+      })
+
+      .addCase(RevokeRefreshToken.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(RevokeRefreshToken.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.user = null;
+      })
+      .addCase(
+        RevokeRefreshToken.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+          state.success = false;
+        }
+      )
       .addDefaultCase((state) => {
         state.loading = false;
         state.error = null;
@@ -238,6 +425,7 @@ const authSlice = createSlice({
 });
 
 // Export actions and reducer
-export const selectIsAuthenticated = (state: { auth: { token: any; }; }) => !!state.auth.token;
+export const selectIsAuthenticated = (state: { auth: { token: any } }) =>
+  !!state.auth.token;
 export const { clearError } = authSlice.actions;
 export default authSlice.reducer;

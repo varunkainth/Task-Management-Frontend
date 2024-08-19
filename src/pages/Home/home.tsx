@@ -18,7 +18,6 @@ const HomePage: React.FC = () => {
       setUserProfile(JSON.parse(userFromStorage));
     }
   }, []);
-  console.log("User Profile", userProfile);
 
   if (!userProfile) {
     return (

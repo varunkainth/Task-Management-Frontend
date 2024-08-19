@@ -30,7 +30,7 @@ const AuthRoute: React.FC<AuthRouteProps> = ({ element, redirectPath }) => {
     (location.pathname === "/login" || location.pathname === "/register")
   ) {
     console.log("User is authenticated, redirecting to home");
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // If no redirection is needed, render the provided element

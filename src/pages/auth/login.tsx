@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -17,36 +17,42 @@ const Login = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
-  const [isVerified, setIsVerified] = useState<boolean | null>(false);
-
   const { loginUser, signupWithGoogle, signupWithGithub, verifyEmail } =
     useAuth();
+  const data = localStorage.getItem("success");
 
-    useEffect(() => {
-      console.log("isVerified state updated:", isVerified);
-    }, [isVerified]);
+  let success: boolean = false;
+  if (data) {
+    try {
+      const parsedData = JSON.parse(data);
+      success = parsedData.success || false;
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+      success = false;
+    }
+  }
 
-    const handleEmailVerification = async () => {
-      console.log("Email verification initiated");
-    
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        setErrors({ email: "Invalid email format" });
-        console.log("Invalid email format");
-        return;
-      }
-      setErrors({});
-    
-      try {
-        await verifyEmail(email);
-        console.log("Email verification successful");
-        setIsVerified(true);
-      } catch (error) {
-        console.error("Verification error:", error);
-      }
-    };
-    
-    console.log("Current isVerified state:", isVerified);
+  console.log(success);
+
+  const handleEmailVerification = async () => {
+    console.log("Email verification initiated");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrors({ email: "Invalid email format" });
+      console.log("Invalid email format");
+      return;
+    }
+    setErrors({});
+
+    try {
+      await verifyEmail(email);
+      console.log("Email verification successful");
+    } catch (error) {
+      console.error("Verification error:", error);
+    }
+  };
+
   const handleLogin = () => {
     if (!password) {
       setErrors({ password: "Password is required" });
@@ -98,7 +104,7 @@ const Login = () => {
             )}
           </div>
 
-          {isVerified === false && (
+          {success === false && (
             <Button
               type="button"
               className="w-full mt-4 transition-transform transform hover:scale-105"
@@ -108,7 +114,7 @@ const Login = () => {
             </Button>
           )}
 
-          {isVerified && (
+          {success && (
             <div className="relative animate-fadeIn">
               <Label className="text-white">Password</Label>
               <Input

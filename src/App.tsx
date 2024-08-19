@@ -10,13 +10,13 @@ const App: React.FC = () => {
     <BrowserRouter>
       <Routes>
         {/* Protected route for the home page - only accessible to authenticated users */}
-        <Route path="/home" element={<AuthRoute element={<HomePage />} redirectPath="/login" />} />
+        <Route path="/" element={<AuthRoute element={<HomePage />} redirectPath="/login" />} />
 
         {/* Public route for login - only accessible to unauthenticated users */}
-        <Route path="/login" element={<AuthRoute element={<Login />} redirectPath="/home" />} />
+        <Route path="/login" element={<AuthRoute element={<Login />} redirectPath="/" />} />
 
         {/* Public route for registration - only accessible to unauthenticated users */}
-        <Route path="/register" element={<AuthRoute element={<Register />} redirectPath="/home" />} />
+        <Route path="/register" element={<AuthRoute element={<Register />} redirectPath="/" />} />
       </Routes>
     </BrowserRouter>
   );

@@ -7,6 +7,7 @@ import {
   RegisterCredentials,
   AuthResponse,
   User,
+  UserData,
 } from "@/types/auth";
 import { API_ENDPOINTS } from "@/types/api";
 
@@ -118,9 +119,7 @@ export const CreatepasswordresetToken = createAsyncThunk<AuthResponse, string>(
     try {
       const response = await api.post<AuthResponse>(
         API_ENDPOINTS.CREATE_PASSWORD_TOKEN,
-        {
-          email,
-        }
+        email
       );
       return response.data;
     } catch (err: any) {
@@ -137,9 +136,7 @@ export const VerifyPasswordToken = createAsyncThunk<AuthResponse, string>(
     try {
       const response = await api.post<AuthResponse>(
         API_ENDPOINTS.VERIFY_PASSWORD_TOKEN,
-        {
-          token,
-        }
+        token
       );
       return response.data;
     } catch (err: any) {
@@ -150,15 +147,13 @@ export const VerifyPasswordToken = createAsyncThunk<AuthResponse, string>(
   }
 );
 
-export const UsePasswordToken = createAsyncThunk<AuthResponse>(
+export const UsePasswordToken = createAsyncThunk<AuthResponse, UserData>(
   "auth/passwordToken",
   async (userData, { rejectWithValue }) => {
     try {
       const response = await api.post<AuthResponse>(
         API_ENDPOINTS.PASSWORD_RESET_TOKEN,
-        {
-          userData,
-        }
+        userData
       );
       return response.data;
     } catch (err: any) {
@@ -169,15 +164,13 @@ export const UsePasswordToken = createAsyncThunk<AuthResponse>(
   }
 );
 
-export const RefreshToken = createAsyncThunk<AuthResponse>(
+export const RefreshToken = createAsyncThunk<AuthResponse,string>(
   "auth/refreshToken",
   async (token, { rejectWithValue }) => {
     try {
       const response = await api.post<AuthResponse>(
         API_ENDPOINTS.REFRESH_TOKEN,
-        {
-          token,
-        }
+        token
       );
       return response.data;
     } catch (err: any) {
@@ -186,15 +179,13 @@ export const RefreshToken = createAsyncThunk<AuthResponse>(
   }
 );
 
-export const RevokeRefreshToken = createAsyncThunk<AuthResponse>(
+export const RevokeRefreshToken = createAsyncThunk<AuthResponse,string>(
   "auth/RevokeRefreshToken",
   async (token, { rejectWithValue }) => {
     try {
       const response = await api.post<AuthResponse>(
         API_ENDPOINTS.REFRESH_TOKEN_REVOKE,
-        {
-          token,
-        }
+        token
       );
       return response.data;
     } catch (err: any) {
@@ -365,7 +356,6 @@ const authSlice = createSlice({
         (state, action: PayloadAction<AuthResponse>) => {
           state.loading = false;
           state.success = true;
-          // Optionally, you can handle the response data here, e.g., update user or token
           state.user = action.payload.user;
           state.token = action.payload.token;
           state.isAuthenticated = true;

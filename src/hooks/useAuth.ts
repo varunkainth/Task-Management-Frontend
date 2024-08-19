@@ -1,49 +1,101 @@
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "@/store";
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '@/store';
 import {
   login,
   register,
   logout,
+  emailVerify,
   googleSignup,
   githubSignup,
-  emailVerify,
   clearError,
-} from "@/features/auth/authSlice";
-import { LoginCredentials, RegisterCredentials } from "@/types/auth";
+  UsePasswordToken,
+  CreatepasswordresetToken,
+  VerifyPasswordToken,
+  RefreshToken,
+  RevokeRefreshToken,
+} from '@/features/auth/authSlice';
+import { LoginCredentials, RegisterCredentials, UserData } from '@/types/auth';
 
-const useAuth = () => {
+export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
   const auth = useSelector((state: RootState) => state.auth);
 
-  const loginUser = (credentials: LoginCredentials) =>
-    dispatch(login(credentials));
-  const registerUser = (userData: RegisterCredentials) =>
-    dispatch(register(userData));
-  const logoutUser = () => dispatch(logout());
-  const signupWithGoogle = (idToken: string) => dispatch(googleSignup(idToken));
-  const signupWithGithub = (idToken: string) => dispatch(githubSignup(idToken));
-  const clearAuthError = () => dispatch(clearError());
+  const loginUser = useCallback(
+    (credentials: LoginCredentials) => dispatch(login(credentials)),
+    [dispatch]
+  );
 
-  const verifyEmail = async (email: string) => {
-    await dispatch(emailVerify(email));
-    return auth.success;
-  };
+  const registerUser = useCallback(
+    (userData: RegisterCredentials) => dispatch(register(userData)),
+    [dispatch]
+  );
+
+  const logoutUser = useCallback(() => dispatch(logout()), [dispatch]);
+
+  const verifyEmail = useCallback(
+    (email: string) => dispatch(emailVerify(email)),
+    [dispatch]
+  );
+
+  const signupWithGoogle = useCallback(
+    (idToken: string) => dispatch(googleSignup(idToken)),
+    [dispatch]
+  );
+
+  const signupWithGithub = useCallback(
+    (idToken: string) => dispatch(githubSignup(idToken)),
+    [dispatch]
+  );
+
+  const createResetToken = useCallback(
+    (email: string) => dispatch(CreatepasswordresetToken(email)),
+    [dispatch]
+  );
+
+  const verifyResetToken = useCallback(
+    (token: string) => dispatch(VerifyPasswordToken(token)),
+    [dispatch]
+  );
+
+  const resetPassword = useCallback(
+    async (userData: UserData) => {
+      try {
+        await dispatch(UsePasswordToken(userData)).unwrap();
+        return auth.success;
+      } catch (error) {
+        console.error("Failed to use password reset token:", error);
+        return false;
+      }
+    },
+    [dispatch, auth.success]
+  );
+
+  const refreshUserToken = useCallback(
+    (token: string) => dispatch(RefreshToken(token)),
+    [dispatch]
+  );
+
+  const revokeUserToken = useCallback(
+    (token: string) => dispatch(RevokeRefreshToken(token)),
+    [dispatch]
+  );
+
+  const clearAuthError = useCallback(() => dispatch(clearError()), [dispatch]);
 
   return {
-    user: auth.user,
-    token: auth.token,
-    isAuthenticated: auth.isAuthenticated,
-    loading: auth.loading,
-    error: auth.error,
-    success: auth.success,
+    ...auth,
     loginUser,
     registerUser,
     logoutUser,
+    verifyEmail,
     signupWithGoogle,
     signupWithGithub,
+    createResetToken,
+    verifyResetToken,
+    resetPassword,
+    refreshUserToken,
+    revokeUserToken,
     clearAuthError,
-    verifyEmail,
   };
 };
-
-export default useAuth;

@@ -17,7 +17,7 @@ const ProfileDropdown: React.FC = () => {
           className="flex items-center space-x-2 text-gray-300 hover:text-white focus:outline-none"
           onClick={handleToggle}
         >
-          <FaUserCircle className="w-8 h-8" />
+          {user? <img src={user.profilePic} alt={`${user.name} Profile Pic`}  className="w-8 h-8 rounded-full"/>: <FaUserCircle className="w-8 h-8" />}
           <span>{user.name}</span>
         </button>
       </DropdownMenuTrigger>

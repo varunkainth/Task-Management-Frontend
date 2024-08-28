@@ -6,10 +6,12 @@ import HomePage from "./pages/Home/home";
 import AuthRoute from "./features/protected/protectedRoute";
 import ForgotPassword from "./pages/auth/password/forgotPassword";
 import ResetPasswordForm from "./pages/auth/password/resetPassword";
+import Navbar from "./pages/Home/Navbar/navbar";
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
+    <Navbar/>
       <Routes>
         {/* Protected route for the home page - only accessible to authenticated users */}
         <Route

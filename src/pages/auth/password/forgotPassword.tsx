@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState<string>('');
-  const { createResetToken, loading, error } = useAuth();
+  const { createResetToken, loading, error,message } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +42,11 @@ const ForgotPassword: React.FC = () => {
           {error && (
             <p className="text-red-500 text-center mt-2">{error}</p>
           )}
+          {
+            message && (
+              <p className="text-green-500 text-center mt-2">{message}</p>
+            )
+          }
           <Button
             type="submit"
             className="w-full mt-4 transition-transform transform hover:scale-105"

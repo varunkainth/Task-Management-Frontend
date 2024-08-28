@@ -154,7 +154,7 @@ export const UsePasswordToken = createAsyncThunk<AuthResponse, UserData>(
     try {
       const response = await api.post<AuthResponse>(
         API_ENDPOINTS.PASSWORD_RESET_TOKEN,
-        userData
+        {userData}
       );
       return response.data;
     } catch (err: any) {
@@ -204,6 +204,7 @@ const initialState: AuthState = {
   loading: false,
   isAuthenticated: !!getLocalStorage<string>("token"),
   success: false,
+  message:null,
 };
 
 // Slice for authentication
@@ -318,9 +319,10 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(CreatepasswordresetToken.fulfilled, (state) => {
+      .addCase(CreatepasswordresetToken.fulfilled, (state,action) => {
         state.loading = false;
         state.success = true;
+        state.message =  action.payload.message;
       })
       .addCase(
         CreatepasswordresetToken.rejected,
@@ -335,9 +337,10 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(VerifyPasswordToken.fulfilled, (state) => {
+      .addCase(VerifyPasswordToken.fulfilled, (state,action) => {
         state.loading = false;
         state.success = true;
+        state.message = action.payload.message
       })
       .addCase(
         VerifyPasswordToken.rejected,
@@ -345,6 +348,7 @@ const authSlice = createSlice({
           state.loading = false;
           state.error = action.payload;
           state.success = false;
+          state.message = action.payload.message
         }
       )
 
@@ -356,10 +360,10 @@ const authSlice = createSlice({
         UsePasswordToken.fulfilled,
         (state, action: PayloadAction<AuthResponse>) => {
           state.loading = false;
-          state.success = true;
+          state.success = action.payload.success;
           state.user = action.payload.user;
           state.token = action.payload.token;
-          state.isAuthenticated = true;
+          state.isAuthenticated = false;
         }
       )
       .addCase(

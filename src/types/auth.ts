@@ -14,6 +14,7 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
   success?: boolean;
+  message?:string | null;
 }
 
 export interface LoginCredentials {
@@ -32,7 +33,7 @@ export interface RegisterCredentials {
 
 export interface UserData {
   token: string;
-  password?: string;
+  newPassword?: string;
 }
 export interface AuthResponse {
   success: boolean | undefined;

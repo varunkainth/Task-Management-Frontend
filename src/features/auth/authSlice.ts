@@ -134,9 +134,10 @@ export const VerifyPasswordToken = createAsyncThunk<AuthResponse, string>(
   "auth/verify/PasswordToken",
   async (token, { rejectWithValue }) => {
     try {
+      console.log("Token for verify",token)
       const response = await api.post<AuthResponse>(
         API_ENDPOINTS.VERIFY_PASSWORD_TOKEN,
-        token
+        {token}
       );
       return response.data;
     } catch (err: any) {

@@ -4,7 +4,8 @@ import Login from "./pages/auth/login";
 import Register from "./pages/auth/register";
 import HomePage from "./pages/Home/home";
 import AuthRoute from "./features/protected/protectedRoute";
-import ForgotPassword from "./pages/auth/forgotPassword";
+import ForgotPassword from "./pages/auth/password/forgotPassword";
+import ResetPasswordForm from "./pages/auth/password/resetPassword";
 
 const App: React.FC = () => {
   return (
@@ -27,7 +28,12 @@ const App: React.FC = () => {
           path="/register"
           element={<AuthRoute element={<Register />} redirectPath="/" />}
         />
-        <Route path="/forgot_password" element={<ForgotPassword />} />
+
+        {/* Public route for forgot password */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* Public route for reset password */}
+        <Route path="/reset-password/:token" element={<ResetPasswordForm />} />
       </Routes>
     </BrowserRouter>
   );

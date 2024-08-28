@@ -20,6 +20,7 @@ import { LoginCredentials, RegisterCredentials, UserData } from "@/types/auth";
 const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
   const auth = useSelector((state: RootState) => state.auth);
+  // console.log(auth.user)
 
   const loginUser = useCallback(
     (credentials: LoginCredentials) => dispatch(login(credentials)),

@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import useAuth from '@/hooks/useAuth';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import useAuth from "@/hooks/useAuth";
 
 const ResetPasswordForm = () => {
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [tokenVerified, setTokenVerified] = useState(false);
-  const { user, verifyResetToken, resetPassword,success } = useAuth();
+  const { user, verifyResetToken, resetPassword, success } = useAuth();
   const navigate = useNavigate();
   const { token } = useParams(); // Assuming token is passed as a URL parameter
 
   useEffect(() => {
     const verifyToken = async () => {
       if (token) {
-         await verifyResetToken(token as string);
+        await verifyResetToken(token as string);
         if (!success) {
-          setError('Invalid or expired reset token.');
+          setError("Invalid or expired reset token.");
         } else {
           setTokenVerified(true);
         }
@@ -32,31 +32,33 @@ const ResetPasswordForm = () => {
     setError(null);
 
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       return;
     }
 
     if (!user) {
-      setError('User information is missing.');
+      setError("User information is missing.");
       return;
     }
 
-    const success = await resetPassword({
+    await resetPassword({
       password: newPassword,
       token: token as string,
     });
 
+    console.log("success ", success);
+
     if (success) {
-      navigate('/login'); // Redirect to login page after successful password reset
+      navigate("/login"); // Redirect to login page after successful password reset
     } else {
-      setError('Failed to reset password. Please try again.');
+      setError("Failed to reset password. Please try again.");
     }
   };
 
   if (!tokenVerified) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="text-red-500">{error || 'Verifying token...'}</div>
+        <div className="text-red-500">{error || "Verifying token..."}</div>
       </div>
     );
   }
@@ -70,7 +72,10 @@ const ResetPasswordForm = () => {
         <h2 className="text-2xl font-bold mb-6">Reset Your Password</h2>
         {user && (
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <Input
@@ -83,7 +88,10 @@ const ResetPasswordForm = () => {
           </div>
         )}
         <div className="mb-4">
-          <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="new-password"
+            className="block text-sm font-medium text-gray-700"
+          >
             New Password
           </label>
           <Input
@@ -95,7 +103,10 @@ const ResetPasswordForm = () => {
           />
         </div>
         <div className="mb-6">
-          <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="confirm-password"
+            className="block text-sm font-medium text-gray-700"
+          >
             Confirm New Password
           </label>
           <Input
@@ -109,7 +120,9 @@ const ResetPasswordForm = () => {
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <Button
           type="submit"
-          disabled={!newPassword || !confirmPassword || newPassword !== confirmPassword}
+          disabled={
+            !newPassword || !confirmPassword || newPassword !== confirmPassword
+          }
           className="w-full bg-blue-600 text-white"
         >
           Reset Password

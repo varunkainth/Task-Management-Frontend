@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { FaBell, FaUserCircle } from "react-icons/fa";
-import ProfileDropdown from "@/pages/Profile/profile";
+import ProfileDropdown from "@/pages/Profile/profileDropDown";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);

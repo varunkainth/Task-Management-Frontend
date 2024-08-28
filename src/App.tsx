@@ -7,11 +7,12 @@ import AuthRoute from "./features/protected/protectedRoute";
 import ForgotPassword from "./pages/auth/password/forgotPassword";
 import ResetPasswordForm from "./pages/auth/password/resetPassword";
 import Navbar from "./pages/Home/Navbar/navbar";
+import ProfilePage from "./pages/Profile/profile";
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-    <Navbar/>
+      <Navbar />
       <Routes>
         {/* Protected route for the home page - only accessible to authenticated users */}
         <Route
@@ -36,6 +37,14 @@ const App: React.FC = () => {
 
         {/* Public route for reset password */}
         <Route path="/reset-password/:token" element={<ResetPasswordForm />} />
+
+        {/* Protected route for the Profile page - only accessible to authenticated users */}
+        <Route
+          path="/profile"
+          element={
+            <AuthRoute element={<ProfilePage />} redirectPath="/login" />
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -46,6 +46,7 @@ export interface RegisterCredentials {
 
 export interface UserData {
   token: string;
+  userId?:string
   newPassword?: string;
 }
 export interface AuthResponse {

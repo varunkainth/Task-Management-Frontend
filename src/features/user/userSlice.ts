@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { user, UserData } from "@/types/auth"; // Assuming you have this type defined
+import {  user, UserData } from "@/types/auth"; // Assuming you have this type defined
 import api from "@/api/api";
 import { API_ENDPOINTS } from "@/types/api";
 
@@ -37,7 +37,7 @@ export const getAllUsers = createAsyncThunk(
 // Async thunk to get user details
 export const getUserDetails = createAsyncThunk(
   "user/getUserDetails",
-  async (userData:user, { rejectWithValue }) => {
+  async (userId:UserData, { rejectWithValue }) => {
     try {
       const response = await api.get(`${API_ENDPOINTS.USER_GET}/${userId}`);
       return response.data;
@@ -50,7 +50,7 @@ export const getUserDetails = createAsyncThunk(
 // Async thunk to update user details
 export const updateUserDetails = createAsyncThunk(
   "user/updateUserDetails",
-  async (userData: Partial<UserData>, { rejectWithValue }) => {
+  async (userData: Partial<user>, { rejectWithValue }) => {
     try {
       const response = await api.put(
         API_ENDPOINTS.USER_UPDATE_PROFILE,

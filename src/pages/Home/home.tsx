@@ -13,7 +13,7 @@ interface UserProfile {
 
 const HomePage: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const { logoutUser } = useAuth();
+  const { logoutUser,user } = useAuth();
 
   useEffect(() => {
     const userFromStorage = localStorage.getItem("user");
@@ -42,6 +42,10 @@ const HomePage: React.FC = () => {
             <AvatarImage src={userProfile.profilePic} alt={userProfile.name} />
             <AvatarFallback>{userProfile.name}</AvatarFallback>
           </Avatar>
+          {/* <Avatar className="w-24 h-24 mb-4">
+            <AvatarImage src={user?.totp_qr_url} alt={userProfile.name} />
+            <AvatarFallback>{userProfile.name}</AvatarFallback>
+          </Avatar> */}
           <div className="space-y-2 text-center">
             <p>
               <span className="font-semibold">Name:</span> {userProfile.name}
@@ -63,6 +67,7 @@ const HomePage: React.FC = () => {
           Logout
         </Button>
       </Card>
+      <img src={user?.totp_qr_url} alt="" />
     </div>
   );
 };

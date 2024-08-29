@@ -17,6 +17,7 @@ export interface User {
   dateOfbirth?: Date;
   gender?: string;
   provider?: string;
+  totp_qr_url?:string
 }
 
 export interface AuthState {
@@ -52,4 +53,15 @@ export interface AuthResponse {
   token: string;
   user: User;
   message: string;
+}
+
+
+export interface user{
+  name?:string
+  email?:string
+  phoneNumber?:string
+  social?:SocialMedia
+  dateOfBirth?:Date
+  gender?:string
+  profilePic?:string
 }

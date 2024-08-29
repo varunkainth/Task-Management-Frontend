@@ -11,12 +11,12 @@ export const API_ENDPOINTS = {
   PASSWORD_RESET_TOKEN: "/api/auth/use-password-reset-token",
   REFRESH_TOKEN: "/api/auth/refresh-token",
   REFRESH_TOKEN_REVOKE: "/api/auth/revoke-refresh-token",
-  USER_UPDATE_PROFILE: "api/user/users/update",
-  USER_UPDATE_PASSWORD: "api/user/users/update-password",
-  USER_UPDATE_PROFILE_PIC: "api/user/users/update-profile-pic",
-  USER_DELETE: "api/user/users/delete",
-  USER_GET: "api/user/users/get",
-  USER_GET_ALL: "api/user/users/get-all",
+  USER_UPDATE_PROFILE: "api/users/update",
+  USER_UPDATE_PASSWORD: "api/users/update-password",
+  USER_UPDATE_PROFILE_PIC: "api/users/update-profile-pic",
+  USER_DELETE: "api/users/delete",
+  USER_GET: "api/users/get",
+  USER_GET_ALL: "api/users/get-all",
 } as const;
 
 export type API_ENDPOINTS = typeof API_ENDPOINTS;

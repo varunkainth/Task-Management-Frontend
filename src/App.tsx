@@ -8,6 +8,7 @@ import ForgotPassword from "./pages/auth/password/forgotPassword";
 import ResetPasswordForm from "./pages/auth/password/resetPassword";
 import Navbar from "./pages/Home/Navbar/navbar";
 import ProfilePage from "./pages/Profile/profile";
+import Dashboard from "./pages/Dashboard/dashboard";
 
 const App: React.FC = () => {
   return (
@@ -43,6 +44,13 @@ const App: React.FC = () => {
           path="/profile"
           element={
             <AuthRoute element={<ProfilePage />} redirectPath="/login" />
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <AuthRoute element={<Dashboard/>} redirectPath="/login" />
           }
         />
       </Routes>

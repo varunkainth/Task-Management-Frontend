@@ -5,30 +5,41 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import useAuth from '@/hooks/useAuth';
+import useUser from '@/hooks/useUser';
+
+interface SocialMediaLink {
+  type: string;
+  url: string;
+}
 
 interface ProfileData {
   name: string;
   userId: string;
   email: string;
   phoneNumber: string;
-  github: string;
-  twitter: string;
-  linkedin: string;
-  instagram: string;
+  socialLinks: SocialMediaLink[];
+  gender: string;
+  dob: Date;
 }
 
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const {user} = useAuth();
+  const { user } = useAuth();
+  const { updateUserDetail } = useUser();
+
   const [profile, setProfile] = useState<ProfileData>({
     name: user?.name || "John Wick",
-    userId: user?.id||'johndoe123',
-    email: user?.email||'john.doe@example.com',
-    phoneNumber: user?.phoneNumber||'+1 (555) 123-4567',
-    github: user?.social?.url||'github.com/johndoe',
-    twitter: 'twitter.com/johndoe',
-    linkedin: 'linkedin.com/in/johndoe',
-    instagram: 'instagram.com/johndoe'
+    userId: user?.id || 'johndoe123',
+    email: user?.email || 'john.doe@example.com',
+    phoneNumber: user?.phoneNumber || '+1 (555) 123-4567',
+    socialLinks: [
+      { type: 'Github', url: user?.social?.type == "github" ? user?.social?.url || 'github.com/johndoe' : 'github.com/johndoe' },
+      { type: 'Twitter', url: 'twitter.com/johndoe' },
+      { type: 'Linkedin', url: 'linkedin.com/in/johndoe' },
+      { type: 'Instagram', url: 'instagram.com/johndoe' }
+    ],
+    gender: user?.gender||"other",
+    dob: new Date('2024-03-11')
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,12 +47,28 @@ const ProfilePage: React.FC = () => {
     setProfile(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSocialLinkChange = (index: number, value: string) => {
+    setProfile(prev => {
+      const newLinks = [...prev.socialLinks];
+      newLinks[index].url = value;
+      return { ...prev, socialLinks: newLinks };
+    });
+  };
+
   const toggleEdit = () => {
     setIsEditing(!isEditing);
   };
 
-  const saveChanges = () => {
-    // Here you would typically send the updated profile to a backend
+  const saveChanges = async () => {
+    await updateUserDetail({
+      name: profile.name,
+      phoneNumber: profile.phoneNumber,
+      email: profile.email,
+      gender: profile.gender,
+      dateOfBirth: profile.dob,
+      social: profile.socialLinks,
+    });
+    console.log("success");
     setIsEditing(false);
   };
 
@@ -64,23 +91,88 @@ const ProfilePage: React.FC = () => {
             </div>
 
             <div className="space-y-4 md:w-2/3">
-              {Object.entries(profile).map(([key, value]) => (
-                <div key={key} className="flex flex-col space-y-1">
-                  <label className="text-sm font-medium text-white capitalize">
-                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                  </label>
-                  {isEditing ? (
-                    <Input
-                      name={key}
-                      value={value}
-                      onChange={handleInputChange}
-                      className="mt-1"
-                    />
-                  ) : (
-                    <p className="text-blue-800">{value}</p>
-                  )}
-                </div>
-              ))}
+              <div className="flex flex-col space-y-1">
+                <label className="text-sm font-medium text-white capitalize">Name</label>
+                {isEditing ? (
+                  <Input
+                    name="name"
+                    value={profile.name}
+                    onChange={handleInputChange}
+                    className="mt-1"
+                  />
+                ) : (
+                  <p className="text-blue-800">{profile.name}</p>
+                )}
+              </div>
+              <div className="flex flex-col space-y-1">
+                <label className="text-sm font-medium text-white capitalize">Email</label>
+                {isEditing ? (
+                  <Input
+                    name="email"
+                    value={profile.email}
+                    onChange={handleInputChange}
+                    className="mt-1"
+                  />
+                ) : (
+                  <p className="text-blue-800">{profile.email}</p>
+                )}
+              </div>
+              <div className="flex flex-col space-y-1">
+                <label className="text-sm font-medium text-white capitalize">Phone Number</label>
+                {isEditing ? (
+                  <Input
+                    name="phoneNumber"
+                    value={profile.phoneNumber}
+                    onChange={handleInputChange}
+                    className="mt-1"
+                  />
+                ) : (
+                  <p className="text-blue-800">{profile.phoneNumber}</p>
+                )}
+              </div>
+              <div className="flex flex-col space-y-1">
+                <label className="text-sm font-medium text-white capitalize">Gender</label>
+                {isEditing ? (
+                  <Input
+                    name="gender"
+                    value={profile.gender}
+                    onChange={handleInputChange}
+                    className="mt-1"
+                  />
+                ) : (
+                  <p className="text-blue-800">{profile.gender}</p>
+                )}
+              </div>
+              <div className="flex flex-col space-y-1">
+                <label className="text-sm font-medium text-white capitalize">Date of Birth</label>
+                {isEditing ? (
+                  <Input
+                    name="dob"
+                    type="date"
+                    value={profile.dob.toISOString().split('T')[0]}
+                    onChange={handleInputChange}
+                    className="mt-1"
+                  />
+                ) : (
+                  <p className="text-blue-800">{profile.dob.toDateString()}</p>
+                )}
+              </div>
+              <div className="flex flex-col space-y-1">
+                <label className="text-sm font-medium text-white capitalize">Social Links</label>
+                {profile.socialLinks.map((link, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    {isEditing ? (
+                      <Input
+                        value={link.url}
+                        onChange={(e) => handleSocialLinkChange(index, e.target.value)}
+                        className="mt-1 flex-1"
+                      />
+                    ) : (
+                      <p className="text-blue-800">{`${link.type}: ${link.url}`}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -100,12 +192,12 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className="mt-6 flex justify-end flex-wrap">
-            {isEditing ? (
+            {isEditing && (
               <Button onClick={saveChanges} className="mr-2 mb-2 w-full sm:w-auto">Save Changes</Button>
-            ) : null}
-            <Button 
-              variant="outline" 
-              onClick={toggleEdit} 
+            )}
+            <Button
+              variant="outline"
+              onClick={toggleEdit}
               className="w-full sm:w-auto"
             >
               {isEditing ? 'Cancel' : <><Edit2 className="mr-2 h-4 w-4" /> Edit Profile</>}

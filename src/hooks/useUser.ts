@@ -14,7 +14,7 @@ import { user, UserData } from "@/types/auth";
 const useUser = () => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user);
-  console.log(user);
+  // console.log(user);
 
   const getUserDetail = useCallback(
     (userId: UserData) => {

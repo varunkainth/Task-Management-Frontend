@@ -1,5 +1,12 @@
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface SocialMediaLink {
+  type: string;
+  url: string;
+}
+
 export interface SocialMedia {
-  provider?: string;
+  type?: string;
   url?: string;
 }
 
@@ -45,6 +52,7 @@ export interface RegisterCredentials {
 }
 
 export interface UserData {
+  name: ReactNode;
   token: string;
   userId?:string
   newPassword?: string;
@@ -61,8 +69,10 @@ export interface user{
   name?:string
   email?:string
   phoneNumber?:string
-  social?:SocialMedia
+  social?:SocialMedia[]
   dateOfBirth?:Date
   gender?:string
   profilePic?:string
+  userId?:string
+
 }

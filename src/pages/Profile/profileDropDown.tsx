@@ -8,7 +8,7 @@ const ProfileDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleToggle = () => setIsOpen(!isOpen);
-  const {user,} = useAuth();
+  const {user} = useAuth();
 
   return (
     <DropdownMenu>
@@ -18,7 +18,7 @@ const ProfileDropdown: React.FC = () => {
           onClick={handleToggle}
         >
           {user? <img src={user.profilePic} alt={`${user.name} Profile Pic`}  className="w-8 h-8 rounded-full"/>: <FaUserCircle className="w-8 h-8" />}
-          <span>{user.name}</span>
+          <span>{user?.name  ||  'User'}</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-48 bg-gray-800 text-white">

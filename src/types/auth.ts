@@ -1,3 +1,8 @@
+export interface SocialMedia {
+  provider?: string;
+  url?: string;
+}
+
 export interface User {
   id?: string;
   name?: string;
@@ -5,6 +10,13 @@ export interface User {
   password?: string;
   role?: string;
   profilePic?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  phoneNumber?: string;
+  social?: SocialMedia;
+  dateOfbirth?: Date;
+  gender?: string;
+  provider?: string;
 }
 
 export interface AuthState {
@@ -14,7 +26,7 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
   success?: boolean;
-  message?:string | null;
+  message?: string | null;
 }
 
 export interface LoginCredentials {

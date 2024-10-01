@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {  user, UserData } from "@/types/auth"; // Assuming you have this type defined
+import { UserData, User as user } from "@/types/auth"; // Assuming you have this type defined
 import api from "@/api/api";
 import { API_ENDPOINTS } from "@/types/api";
 
@@ -37,7 +37,7 @@ export const getAllUsers = createAsyncThunk(
 // Async thunk to get user details
 export const getUserDetails = createAsyncThunk(
   "user/getUserDetails",
-  async (userId:UserData, { rejectWithValue }) => {
+  async (userId: UserData, { rejectWithValue }) => {
     try {
       const response = await api.get(`${API_ENDPOINTS.USER_GET}/${userId}`);
       return response.data;

@@ -50,11 +50,12 @@ export const API_ENDPOINTS = {
   COMMENT_GET_ALL_SPECIFIC_TASK: "/api/comments/:taskId/comments",
 
   // Inviations Routes
-  INVITATION_CREATE: "/api/invitations/",
+  INVITATION_CREATE: "/api/invitations/projects/:projectId",
   INVITATION_UPDATE: "/api/invitations/:id",
   INVITATION_DELETE: "/api/invitations/:id",
   INVITATION_BY_ID: "/api/invitations/:id",
-  INVITATION_GET_ALL: "/api/invitations/",
+  INVITATION_GET_ALL: "/api/invitations/projects/:projectId/invitations",
+  INVITATION_FOR_SPECIFIC_PROJECT: "/api/inivitations/projects/",
 
   // Notifications Routes
   NOTIFICATION_CREATE: "/api/notifications/",

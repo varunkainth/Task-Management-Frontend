@@ -1,11 +1,19 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button"; // Assuming you're using Shadcn's Button component
 import useAuth  from "@/hooks/useAuth"; // Your custom useAuth hook for user data
 import { ProjectCard } from "@/components/custom/projectCard"; // Assuming you have a ProjectCard component
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth(); // Assuming user data includes project info
+  const { user } = useAuth(); 
+
+
+  const navigate = useNavigate()
+
+  const Redirect = ()=>{
+    navigate("/project/create")
+  }
   
   // Example projects data
   const allProjects = [
@@ -53,7 +61,7 @@ const Dashboard: React.FC = () => {
       {/* Create new project button */}
       <Button
         className="fixed bottom-4 right-4"
-        onClick={() => console.log("Redirect to create project")}
+        onClick={Redirect}
       >
         Create New Project
       </Button>

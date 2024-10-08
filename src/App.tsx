@@ -9,6 +9,7 @@ import ResetPasswordForm from "./pages/auth/password/resetPassword";
 import Navbar from "./pages/Home/Navbar/navbar";
 import ProfilePage from "./pages/Profile/profile";
 import Dashboard from "./pages/Dashboard/dashboard";
+import ProjectCreate from "./pages/projects/createProject";
 
 const App: React.FC = () => {
   return (
@@ -49,8 +50,12 @@ const App: React.FC = () => {
 
         <Route
           path="/dashboard"
+          element={<AuthRoute element={<Dashboard />} redirectPath="/login" />}
+        />
+        <Route
+          path="/project/create"
           element={
-            <AuthRoute element={<Dashboard/>} redirectPath="/login" />
+            <AuthRoute element={<ProjectCreate />} redirectPath="/login" />
           }
         />
       </Routes>

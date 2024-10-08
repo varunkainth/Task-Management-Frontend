@@ -31,12 +31,12 @@ export interface Comment {
 
 // Invitation Type
 export interface Invitation {
-  id: string; // Invitation ID
-  projectId: string; // ID of the project the invitation is for
-  sender: string; // ID of the user who sent the invitation
-  email: string; // Email of the invited user
-  status: "Pending" | "Accepted" | "Rejected"; // Status of the invitation
-  sentAt: Date; // Date the invitation was sent
+  id?: string; // Invitation ID
+  projectId?: string; // ID of the project the invitation is for
+  sender?: string; // ID of the user who sent the invitation
+  email?: string; // Email of the invited user
+  status?: "Pending" | "Accepted" | "Rejected"; // Status of the invitation
+  sentAt?: Date; // Date the invitation was sent
 }
 
 // Notification Type
@@ -64,7 +64,7 @@ export interface Project {
     status: "Pending" | "Accepted" | "Rejected"; // Status of the invitation
     sentAt: Date; // Date the invitation was sent
   }[]; // List of invitations
-  tasks: string[]; // IDs of tasks in the project
+  tasks: Task[]; // IDs of tasks in the project
   createdAt: Date; // Date the project was created
   updatedAt: Date; // Date the project was last updated
 }

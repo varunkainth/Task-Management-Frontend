@@ -1,177 +1,157 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "@/api/api";
+import api  from "@/api/api"
+import { SubTask } from "@/types/auth";
 import { API_ENDPOINTS } from "@/types/api";
-import { SubTask } from "@/types/auth"; // Assuming Subtask type is defined in your types
 
-// Define the initial state
-interface SubtaskState {
-  subtasks: SubTask[];
-  subtask: SubTask | null;
+// Define the state interface
+interface SubTaskState {
+  subTasks: SubTask[];
   loading: boolean;
   error: string | null;
-  message: string | null;
 }
 
-const initialState: SubtaskState = {
-  subtasks: [],
-  subtask: null,
+// Initial state
+const initialState: SubTaskState = {
+  subTasks: [],
   loading: false,
   error: null,
-  message: null,
 };
 
-// Async thunk to get all subtasks for a specific task
-export const getAllSubtasks = createAsyncThunk(
-  "subtask/getAllSubtasks",
-  async (taskId: string, { rejectWithValue }) => {
-    try {
-      const response = await api.get(`${API_ENDPOINTS.SUBTASK_GET_ALL}/${taskId}`);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to fetch subtasks.");
-    }
-  }
-);
+// Async Thunks for API calls
 
-// Async thunk to get details of a specific subtask
-export const getSubtaskDetails = createAsyncThunk(
-  "subtask/getSubtaskDetails",
-  async (subtaskId: string, { rejectWithValue }) => {
-    try {
-      const response = await api.get(`${API_ENDPOINTS.SUBTASK_GET}/${subtaskId}`);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to fetch subtask details.");
-    }
+// Fetch all sub-tasks for a task
+export const fetchSubTasksByTask = createAsyncThunk<
+  SubTask[],
+  string, // taskId
+  { rejectValue: string }
+>("subTasks/fetchByTask", async (taskId, { rejectWithValue }) => {
+  try {
+    const response = await api.get(`${API_ENDPOINTS.SUBTASK_GET_ALL.replace(":id", taskId)}`);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || "Failed to fetch sub-tasks");
   }
-);
+});
 
-// Async thunk to create a new subtask
-export const createSubtask = createAsyncThunk(
-  "subtask/createSubtask",
-  async ({ taskId, subtaskData }: { taskId: string; subtaskData: Partial<SubTask> }, { rejectWithValue }) => {
-    try {
-      const response = await api.post(`${API_ENDPOINTS.SUBTASK_CREATE}/${taskId}`, subtaskData);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to create subtask.");
-    }
+// Create a new sub-task
+export const createSubTask = createAsyncThunk<
+  SubTask,
+  { taskId: string; subTaskData: Partial<SubTask> }, // taskId and sub-task data
+  { rejectValue: string }
+>("subTasks/create", async ({ taskId, subTaskData }, { rejectWithValue }) => {
+  try {
+    const response = await api.post(`${API_ENDPOINTS.SUBTASK_CREATE.replace(":id", taskId)}`, subTaskData);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || "Failed to create sub-task");
   }
-);
+});
 
-// Async thunk to update subtask details
-export const updateSubtaskDetails = createAsyncThunk(
-  "subtask/updateSubtaskDetails",
-  async (subtaskData: Partial<SubTask>, { rejectWithValue }) => {
-    try {
-      const response = await api.put(`${API_ENDPOINTS.SUBTASK_UPDATE}/${subtaskData.id}`, subtaskData);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to update subtask.");
-    }
+// Update a sub-task
+export const updateSubTask = createAsyncThunk<
+  SubTask,
+  { subTaskId: string; subTaskData: Partial<SubTask> }, // subTaskId and sub-task data
+  { rejectValue: string }
+>("subTasks/update", async ({ subTaskId, subTaskData }, { rejectWithValue }) => {
+  try {
+    const response = await api.put(`${API_ENDPOINTS.SUBTASK_UPDATE.replace(":id", subTaskId)}`, subTaskData);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || "Failed to update sub-task");
   }
-);
+});
 
-// Async thunk to delete a subtask
-export const deleteSubtask = createAsyncThunk(
-  "subtask/deleteSubtask",
-  async (subtaskId: string, { rejectWithValue }) => {
-    try {
-      const response = await api.delete(`${API_ENDPOINTS.SUBTASK_DELETE}/${subtaskId}`);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to delete subtask.");
-    }
+// Delete a sub-task
+export const deleteSubTask = createAsyncThunk<
+  { message: string },
+  string, // subTaskId
+  { rejectValue: string }
+>("subTasks/delete", async (subTaskId, { rejectWithValue }) => {
+  try {
+    const response = await api.delete(`${API_ENDPOINTS.SUBTASK_DELETE.replace(":id", subTaskId)}`);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || "Failed to delete sub-task");
   }
-);
+});
 
-// Create the slice
-const subtaskSlice = createSlice({
-  name: "subtask",
+// Sub-task slice
+const subTaskSlice = createSlice({
+  name: "subTasks",
   initialState,
   reducers: {
-    clearSubtaskState: (state) => {
-      state.subtask = null;
-      state.loading = false;
-      state.error = null;
-      state.message = null;
-    },
-    clearError: (state) => {
-      state.error = null;
-      state.message = null;
-    },
+    // Add any synchronous reducers if needed
   },
   extraReducers: (builder) => {
+    // Fetch sub-tasks
     builder
-      // Handle getAllSubtasks
-      .addCase(getAllSubtasks.pending, (state) => {
+      .addCase(fetchSubTasksByTask.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getAllSubtasks.fulfilled, (state, action) => {
+      .addCase(fetchSubTasksByTask.fulfilled, (state, action) => {
+        state.subTasks = action.payload;
         state.loading = false;
-        state.subtasks = action.payload;
+        state.error = null;
       })
-      .addCase(getAllSubtasks.rejected, (state, action) => {
+      .addCase(fetchSubTasksByTask.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
-      })
-      // Handle getSubtaskDetails
-      .addCase(getSubtaskDetails.pending, (state) => {
+        state.error = action.payload || "Failed to fetch sub-tasks";
+      });
+
+    // Create sub-task
+    builder
+      .addCase(createSubTask.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getSubtaskDetails.fulfilled, (state, action) => {
+      .addCase(createSubTask.fulfilled, (state, action) => {
+        state.subTasks.push(action.payload);
         state.loading = false;
-        state.subtask = action.payload;
+        state.error = null;
       })
-      .addCase(getSubtaskDetails.rejected, (state, action) => {
+      .addCase(createSubTask.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
-      })
-      // Handle createSubtask
-      .addCase(createSubtask.pending, (state) => {
+        state.error = action.payload || "Failed to create sub-task";
+      });
+
+    // Update sub-task
+    builder
+      .addCase(updateSubTask.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(createSubtask.fulfilled, (state, action) => {
+      .addCase(updateSubTask.fulfilled, (state, action) => {
+        const index = state.subTasks.findIndex((task: { id: any; }) => task.id === action.payload.id);
+        if (index !== -1) {
+          state.subTasks[index] = action.payload;
+        }
         state.loading = false;
-        state.subtasks.push(action.payload); // Add the new subtask to the list
+        state.error = null;
       })
-      .addCase(createSubtask.rejected, (state, action) => {
+      .addCase(updateSubTask.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
-      })
-      // Handle updateSubtaskDetails
-      .addCase(updateSubtaskDetails.pending, (state) => {
+        state.error = action.payload || "Failed to update sub-task";
+      });
+
+    // Delete sub-task
+    builder
+      .addCase(deleteSubTask.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateSubtaskDetails.fulfilled, (state, action) => {
+      .addCase(deleteSubTask.fulfilled, (state, action) => {
+        state.subTasks = state.subTasks.filter((task: { id: string; }) => task.id !== action.meta.arg);
         state.loading = false;
-        state.subtask = action.payload; // Update the current subtask details
-      })
-      .addCase(updateSubtaskDetails.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      // Handle deleteSubtask
-      .addCase(deleteSubtask.pending, (state) => {
-        state.loading = true;
         state.error = null;
       })
-      .addCase(deleteSubtask.fulfilled, (state, action) => {
+      .addCase(deleteSubTask.rejected, (state, action) => {
         state.loading = false;
-        state.subtasks = state.subtasks.filter((subtask: { id: any; }) => subtask.id !== action.payload.id); // Remove the deleted subtask
-      })
-      .addCase(deleteSubtask.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload || "Failed to delete sub-task";
       });
   },
 });
 
-// Export actions and reducer
-export const { clearSubtaskState, clearError } = subtaskSlice.actions;
-export default subtaskSlice.reducer;
+// Export the reducer and actions
+export default subTaskSlice.reducer;

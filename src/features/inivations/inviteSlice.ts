@@ -21,15 +21,19 @@ const initialState: InvitationState = {
   message: null,
 };
 
-// Async thunk to get all invitations for a user
-export const getAllInvitations = createAsyncThunk(
+// Async thunk to get all invitations for a project
+export const getAllInvitationsForProject = createAsyncThunk(
   "invitation/getAllInvitations",
-  async (_, { rejectWithValue }) => {
+  async (projectId: string, { rejectWithValue }) => {
     try {
-      const response = await api.get(API_ENDPOINTS.INVITATION_GET_ALL);
+      const response = await api.get(
+        `${API_ENDPOINTS.INVITATION_FOR_SPECIFIC_PROJECT}/${projectId}`
+      );
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to fetch invitations.");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch invitations."
+      );
     }
   }
 );
@@ -39,36 +43,53 @@ export const createInvitation = createAsyncThunk(
   "invitation/createInvitation",
   async (invitationData: Partial<Invitation>, { rejectWithValue }) => {
     try {
-      const response = await api.post(API_ENDPOINTS.INVITATION_CREATE, invitationData);
+      const response = await api.post(
+        API_ENDPOINTS.INVITATION_CREATE,
+        invitationData
+      );
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to create invitation.");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to create invitation."
+      );
     }
   }
 );
 
-// Async thunk to accept an invitation
-export const acceptInvitation = createAsyncThunk(
-  "invitation/acceptInvitation",
-  async (invitationId: string, { rejectWithValue }) => {
+// Async thunk to update the status of an invitation
+export const updateInvitationStatus = createAsyncThunk(
+  "invitation/updateInvitationStatus",
+  async (
+    { invitationId, status }: { invitationId: string; status: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await api.post(`${API_ENDPOINTS.INVITATION_ACCEPT}/${invitationId}`);
+      const response = await api.put(
+        `${API_ENDPOINTS.INVITATION_UPDATE}/${invitationId}`,
+        { status } // Sending status in request body
+      );
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to accept invitation.");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update invitation status."
+      );
     }
   }
 );
 
-// Async thunk to decline an invitation
-export const declineInvitation = createAsyncThunk(
-  "invitation/declineInvitation",
+// Async thunk to get an invitation by its ID
+export const getInvitationById = createAsyncThunk(
+  "invitation/getInvitationById",
   async (invitationId: string, { rejectWithValue }) => {
     try {
-      const response = await api.delete(`${API_ENDPOINTS.INVITATION_DELETE}/${invitationId}`);
+      const response = await api.get(
+        `${API_ENDPOINTS.INVITATION_BY_ID}/${invitationId}`
+      );
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Failed to decline invitation.");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to get invitation."
+      );
     }
   }
 );
@@ -78,12 +99,15 @@ const invitationSlice = createSlice({
   name: "invitation",
   initialState,
   reducers: {
+    // Clear the entire invitation state
     clearInvitationState: (state) => {
+      state.invitations = [];
       state.invitation = null;
       state.loading = false;
       state.error = null;
       state.message = null;
     },
+    // Clear error and message fields
     clearError: (state) => {
       state.error = null;
       state.message = null;
@@ -91,20 +115,21 @@ const invitationSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Handle getAllInvitations
-      .addCase(getAllInvitations.pending, (state) => {
+      // getAllInvitationsForProject
+      .addCase(getAllInvitationsForProject.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getAllInvitations.fulfilled, (state, action) => {
+      .addCase(getAllInvitationsForProject.fulfilled, (state, action) => {
         state.loading = false;
-        state.invitations = action.payload;
+        state.invitations = action.payload; // Replace the invitations with fetched data
       })
-      .addCase(getAllInvitations.rejected, (state, action) => {
+      .addCase(getAllInvitationsForProject.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Handle createInvitation
+
+      // createInvitation
       .addCase(createInvitation.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -117,31 +142,36 @@ const invitationSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Handle acceptInvitation
-      .addCase(acceptInvitation.pending, (state) => {
+
+      // updateInvitationStatus
+      .addCase(updateInvitationStatus.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(acceptInvitation.fulfilled, (state, action) => {
+      .addCase(updateInvitationStatus.fulfilled, (state, action) => {
         state.loading = false;
-        // Update the invitations list after accepting
-        state.invitations = state.invitations.filter(inv => inv.id !== action.payload.id);
+        const updatedInvitationIndex = state.invitations.findIndex(
+          (invitation) => invitation.id === action.payload.id
+        );
+        if (updatedInvitationIndex !== -1) {
+          state.invitations[updatedInvitationIndex] = action.payload; // Update the specific invitation in the list
+        }
       })
-      .addCase(acceptInvitation.rejected, (state, action) => {
+      .addCase(updateInvitationStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Handle declineInvitation
-      .addCase(declineInvitation.pending, (state) => {
+
+      // getInvitationById
+      .addCase(getInvitationById.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(declineInvitation.fulfilled, (state, action) => {
+      .addCase(getInvitationById.fulfilled, (state, action) => {
         state.loading = false;
-        // Remove the declined invitation from the list
-        state.invitations = state.invitations.filter(inv => inv.id !== action.payload.id);
+        state.invitation = action.payload; // Set the specific invitation in state
       })
-      .addCase(declineInvitation.rejected, (state, action) => {
+      .addCase(getInvitationById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

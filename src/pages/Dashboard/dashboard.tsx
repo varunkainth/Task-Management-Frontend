@@ -1,70 +1,139 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button"; // Assuming you're using Shadcn's Button component
-import useAuth  from "@/hooks/useAuth"; // Your custom useAuth hook for user data
-import { ProjectCard } from "@/components/custom/projectCard"; // Assuming you have a ProjectCard component
+import { Button } from "@/components/ui/button";
+import useAuth from "@/hooks/useAuth";
+import {ProjectCard} from "@/components/custom/projectCard";
+import { useProjects } from "@/hooks/useProject";
+import { Project } from "@/types/auth";
+import { Plus, Loader2, ArrowRight } from "lucide-react";
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth(); 
+  const { user } = useAuth();
+  const { loadProjects, loading } = useProjects();
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
+  // Fetch projects only once on component mount
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (!isInitialized) {
+        try {
+          const projects = await loadProjects();
+          setAllProjects(projects || []);
+          setError(null);
+        } catch (error) {
+          setError("Failed to load projects. Please try again later.");
+          console.error("Failed to load projects:", error);
+        } finally {
+          setIsInitialized(true);
+        }
+      }
+    };
 
-  const navigate = useNavigate()
+    fetchProjects();
+  }, [isInitialized, loadProjects]);
 
-  const Redirect = ()=>{
-    navigate("/project/create")
-  }
-  
-  // Example projects data
-  const allProjects = [
-    { id: 1, name: "Project 1", description: "Description 1" },
-    { id: 2, name: "Project 2", description: "Description 2" },
-    { id: 3, name: "Project 3", description: "Description 3" },
-    { id: 4, name: "Project 4", description: "Description 4" },
-  ];
+  // Get recent projects (most recent 3)
+  const recentProjects = allProjects.slice(0, 4);
 
-  // For trending projects, you can customize it based on real data
-  const trendingProjects = [
-    { id: 1, name: "Trending Project 1", description: "Trending description 1" },
-    { id: 2, name: "Trending Project 2", description: "Trending description 2" },
-  ];
+  const LoadingState = () => (
+    <div className="flex items-center justify-center h-32">
+      <Loader2 className="h-6 w-6 animate-spin mr-2" />
+      <span className="text-sm">Loading projects...</span>
+    </div>
+  );
+
+  const EmptyState = () => (
+    <div className="border border-dashed rounded-lg p-8 text-center">
+      <p className="text-gray-500 mb-4">You haven't created any projects yet.</p>
+      <Button onClick={() => navigate('/project/create')} className="flex items-center gap-2">
+        <Plus className="h-4 w-4" />
+        Create Your First Project
+      </Button>
+    </div>
+  );
+
+  const ErrorState = () => (
+    <div className="border border-red-200 bg-red-50 rounded-lg p-4 text-red-600">
+      <p>{error}</p>
+      <Button 
+        variant="ghost" 
+        onClick={() => setIsInitialized(false)} 
+        className="mt-2"
+      >
+        Try Again
+      </Button>
+    </div>
+  );
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      
-      {/* Section for displaying user's projects */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Your Projects</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {allProjects.slice(0, 3).map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-gray-500 mt-1">
+            Welcome back, {user?.name || 'User'}
+          </p>
         </div>
-        <div className="mt-4">
-          <Link to="/projects">
-            <Button>View All Projects</Button>
-          </Link>
-        </div>
-      </section>
+        <Button
+          onClick={() => navigate('/project/create')}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          New Project
+        </Button>
+      </div>
 
-      {/* Section for trending projects */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Trending Projects</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {trendingProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      </section>
+      {error ? (
+        <ErrorState />
+      ) : (
+        <>
+          {/* Projects Section */}
+          <section>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Your Projects</h2>
+              {recentProjects.length > 0 && (
+                <Link 
+                  to="/AllProjects"
+                  className="flex items-center text-sm hover:underline gap-1"
+                >
+                  View All Projects
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              )}
+            </div>
 
-      {/* Create new project button */}
-      <Button
-        className="fixed bottom-4 right-4"
-        onClick={Redirect}
-      >
-        Create New Project
-      </Button>
+            {loading ? (
+              <LoadingState />
+            ) : recentProjects.length === 0 ? (
+              <EmptyState />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {recentProjects.map((project) => (
+                  <ProjectCard 
+                    key={project.id} 
+                    project={project}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Create New Project - Fixed Button
+          <div className="fixed bottom-6 right-6">
+            <Button
+              onClick={() => navigate('/project/create')}
+              className="shadow-lg flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Create Project
+            </Button>
+          </div> */}
+        </>
+      )}
     </div>
   );
 };

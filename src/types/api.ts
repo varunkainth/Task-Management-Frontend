@@ -23,7 +23,7 @@ export const API_ENDPOINTS = {
 
   // Project Routes
   PROJECT_CREATE: "/api/projects", // Create a project
-  PROJECT_GET_ALL: "/api/projects", // Get all projects
+  PROJECT_GET_ALL: "/api/projects/", // Get all projects
   PROJECT_GET: "/api/projects/:id", // Get a project by ID
   PROJECT_UPDATE: "/api/projects/:id", // Update a project
   PROJECT_DELETE: "/api/projects/:id", // Delete a project

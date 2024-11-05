@@ -11,7 +11,7 @@ import ProfilePage from "./pages/Profile/profile";
 import Dashboard from "./pages/Dashboard/dashboard";
 import ProjectCreate from "./pages/projects/createProject";
 import AllProjects from "./pages/projects/viewAllProjects";
-import { ProjectDetails } from "./pages/projects/projectView";
+import ProjectDetails from "./pages/projects/projectView";
 
 const App: React.FC = () => {
   return (
@@ -60,17 +60,20 @@ const App: React.FC = () => {
             <AuthRoute element={<ProjectCreate />} redirectPath="/login" />
           }
         />
-        <Route 
+        <Route
           path="/AllProjects"
-          element={<AuthRoute element={<AllProjects />} redirectPath="/login" />}
+          element={
+            <AuthRoute element={<AllProjects />} redirectPath="/login" />
+          }
         />
 
-        <Route 
-        path="/projects/:id"
-        element={<AuthRoute element={<ProjectDetails />} redirectPath="/login" />}
+        <Route
+          path="/projects/:id"
+          element={
+            <AuthRoute element={<ProjectDetails />} redirectPath="/login" />
+          }
         />
       </Routes>
-
     </BrowserRouter>
   );
 };

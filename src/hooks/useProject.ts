@@ -24,6 +24,22 @@ export const useProjects = () => {
     throw new Error(result.payload ?? "Failed to load projects");
   };
 
+  const ProjectById = async (projectId: string): Promise<Project> => {
+    const result = await dispatch(
+      getProjectById({
+        projectId,
+      })
+    );
+
+    // console.log(result)
+
+    if (getProjectById.fulfilled.match(result)) {
+      return result.payload ;
+    }
+  
+    throw new Error(result.payload ?? "Failed to load project details");
+  };
+
   const addProject = (projectData: Partial<Project>) => {
     dispatch(createProject(projectData));
   };
@@ -51,13 +67,7 @@ export const useProjects = () => {
     );
   };
 
-  const ProjectById = (projectId: string) => {
-    dispatch(
-      getProjectById({
-        projectId,
-      })
-    );
-  };
+ 
 
   return {
     ...project,

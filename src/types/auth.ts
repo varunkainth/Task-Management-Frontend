@@ -14,6 +14,7 @@ export interface SocialMedia {
 
 // User Type
 export interface User {
+  _id: string;
   id: string;
   name?: string;
   email?: string;
@@ -67,7 +68,7 @@ export interface Project {
   id: string;
   name: string;
   description?: string;
-  createdBy?: string;
+  createdBy?: { name: string };
   members?: string[];
   invites?: Invitation[];
   tasks?: Task[];

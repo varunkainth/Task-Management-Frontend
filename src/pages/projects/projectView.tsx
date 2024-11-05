@@ -1,184 +1,282 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
-import { Trash2, Calendar, Users } from "lucide-react";
-import { Project } from "@/types/auth";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { Loader2, Pencil, Trash2 } from "lucide-react";
 import { useProjects } from "@/hooks/useProject";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
-interface ProjectCardProps {
-  project?: Project;
+interface FormData {
+  name: string;
+  description: string;
 }
 
-const defaultProject: Project = {
-  id: "",
-  name: "",
-  description: "",
-  createdBy: "",
-  members: [],
-  invites: [],
-  tasks: [],
-};
-
-const formatDate = (date?: Date) => {
-  if (!date) return "N/A";
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
-
-const ProjectDetails: React.FC<ProjectCardProps> = ({
-  project = defaultProject,
-}) => {
+const ProjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const {
+    ProjectById,
+    currentProject,
+    loading: hookLoading,
+    updateProjects,
+    removeProject,
+  } = useProjects();
+
   const [isEditing, setIsEditing] = useState(false);
-  const [editedProject, setEditedProject] = useState<Project>(project);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    description: "",
+  });
 
-  const { removeProject, ProjectById, updateProjects } = useProjects();
+  // Fetch project on mount and when id changes
   useEffect(() => {
-    const fetchProject = async () => {
-      if (id) {
-        const project =  ProjectById(id); // Await the asynchronous function
-        setEditedProject(project || defaultProject); // Assign the result or a default project
-      }
-    };
+    if (!id) return;
 
-    fetchProject();
-  }, [id, ProjectById]);
-
-  const handleDelete = () => {
-    if (id) {
-      removeProject(id);
-      setIsModalOpen(false);
+    try {
+      const currentPRoject = ProjectById(id);
+      console.log(currentPRoject);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch project details",
+        variant: "destructive",
+      });
+      navigate("/AllProjects");
     }
+  }, []);
+
+  // Update form data when project changes
+  useEffect(() => {
+    if (currentProject) {
+      setFormData({
+        name: currentProject.name || "",
+        description: currentProject.description || "",
+      });
+    }
+  }, [currentProject]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleUpdate = () => {
-    if (id) {
-      updateProjects({ projectData: editedProject, projectId: id });
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Project name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!currentProject || !id) return;
+
+    try {
+      setIsSaving(true);
+
+      updateProjects({
+        projectId: id,
+        projectData: {
+          ...currentProject,
+          ...formData,
+          name: formData.name.trim(),
+          description: formData.description.trim(),
+        },
+      });
+
       setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "Project updated successfully",
+      });
+
+      // Refresh project data
+      await ProjectById(id);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update project",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const renderEditMode = () => (
-    <div className="space-y-4">
-      <input
-        value={editedProject.name || ""}
-        onChange={(e) =>
-          setEditedProject({ ...editedProject, name: e.target.value })
-        }
-        className="w-full px-3 py-2 border rounded-md text-lg font-semibold"
-        placeholder="Project Name"
-      />
-      <textarea
-        value={editedProject.description || ""}
-        onChange={(e) =>
-          setEditedProject({ ...editedProject, description: e.target.value })
-        }
-        className="w-full px-3 py-2 border rounded-md min-h-[100px]"
-        placeholder="Project Description"
-      />
-      <div className="flex justify-end space-x-2">
-        <button
-          onClick={() => setIsEditing(false)}
-          className="px-4 py-2 border rounded-md hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleUpdate}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          Save Changes
-        </button>
-      </div>
+  const handleDelete = async () => {
+    if (!id) return;
+
+    if (!window.confirm("Are you sure you want to delete this project?")) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+
+      removeProject(id);
+
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
+      navigate("/AllProjects");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete project",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const renderEditForm = () => (
+    <div className="max-w-3xl mx-auto space-y-4">
+      <form onSubmit={handleUpdate} className="space-y-6">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Project Name</label>
+          <Input
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder="Project Name"
+            className="text-lg"
+            maxLength={100}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Project Description</label>
+          <Textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            placeholder="Project Description"
+            className="min-h-[200px] resize-none"
+            maxLength={500}
+          />
+        </div>
+
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsEditing(false)}
+            disabled={isSaving}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSaving || !formData.name.trim()}>
+            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save Changes
+          </Button>
+        </div>
+      </form>
     </div>
   );
 
-  const renderViewMode = () => (
-    <div className="space-y-4">
+  const renderProjectDetails = () => (
+    <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">
-          {editedProject.name || "Untitled Project"}
-        </h2>
-        <div className="space-x-2">
-          <button
+        <h1 className="text-3xl font-bold truncate">
+          {currentProject?.name || "Untitled Project"}
+        </h1>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
             onClick={() => setIsEditing(true)}
-            className="px-4 py-2 border rounded-md hover:bg-gray-50"
+            disabled={isDeleting}
           >
-            Edit
-          </button>
-          <button
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="destructive"
+            size="icon"
             onClick={handleDelete}
-            className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+            disabled={isDeleting}
           >
-            <Trash2 className="h-4 w-4" />
-          </button>
+            {isDeleting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
-      <p className="text-gray-600">
-        {editedProject.description || "No description available"}
-      </p>
-      <div className="border-t pt-4 space-y-2">
-        <div className="flex items-center text-sm text-gray-500">
-          <Users className="h-4 w-4 mr-2" />
-          <span>Created by: {editedProject.createdBy || "Unknown"}</span>
-        </div>
-        <div className="flex items-center text-sm text-gray-500">
-          <Calendar className="h-4 w-4 mr-2" />
-          <span>Created: {formatDate(editedProject.createdAt)}</span>
-        </div>
-        <div className="flex items-center text-sm text-gray-500">
-          <Users className="h-4 w-4 mr-2" />
-          <span>Members: {editedProject.members?.length || 0}</span>
-        </div>
+
+      <div className="bg-muted/50 rounded-lg p-6">
+        <p className="text-muted-foreground whitespace-pre-wrap">
+          {currentProject?.description || "No description available"}
+        </p>
+      </div>
+
+      <div className="border-t pt-4 text-sm text-muted-foreground">
+        <p>
+          Created:{" "}
+          {new Date(currentProject?.createdAt || "").toLocaleDateString()}
+        </p>
+        {currentProject?.updatedAt && (
+          <p>
+            Last updated:{" "}
+            {new Date(currentProject.updatedAt).toLocaleDateString()}
+          </p>
+        )}
+        <p>CreateBy: {currentProject?.createdBy?.name}</p>
       </div>
     </div>
   );
 
   return (
-    <>
-      <div
-        onClick={() => setIsModalOpen(true)}
-        className="border rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer p-4"
-      >
-        <div className="mb-3">
-          <h3 className="font-semibold truncate">
-            {project.name || "Untitled Project"}
-          </h3>
-        </div>
-        <div>
-          <p className="text-gray-600 line-clamp-2">
-            {project.description || "No description available"}
-          </p>
-          <div className="mt-4 flex items-center text-sm text-gray-500">
-            <Users className="h-4 w-4 mr-2" />
-            <span>{project.members?.length || 0} members</span>
-          </div>
-        </div>
+    <main className="container py-8">
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/AllProjects")}
+          className="mb-4"
+        >
+          ← Back to Projects
+        </Button>
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-[500px] w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">
-                {isEditing ? "Edit Project" : "Project Details"}
-              </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ×
-              </button>
-            </div>
-            {isEditing ? renderEditMode() : renderViewMode()}
-          </div>
+      {hookLoading ? (
+        <div className="flex justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
+      ) : !currentProject ? (
+        <div className="text-center text-muted-foreground p-4">
+          <p>Project not found</p>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/AllProjects")}
+            className="mt-4"
+          >
+            Return to Projects
+          </Button>
+        </div>
+      ) : isEditing ? (
+        renderEditForm()
+      ) : (
+        renderProjectDetails()
       )}
-    </>
+    </main>
   );
 };
 
-export { ProjectDetails };
+export default ProjectDetails;
